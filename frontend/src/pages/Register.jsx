@@ -1,188 +1,149 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
-import { useNavigate } from "react-router-dom";
 
 function Register() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role: "seeker"
+    role: "seeker",
   });
 
-  const navigate = useNavigate();
-    const handleSubmit = async (e) => {
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
-        alert("Passwords do not match!");
-        return;
+      setError("Passwords do not match");
+      return;
     }
+
+    setLoading(true);
 
     try {
-        const response = await api.post("register/", {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-        });
+      await api.post("register/", formData);
 
-        if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-        }
-
-        alert("Registration successful!");
-
-        navigate("/login");
-
-    } catch (error) {
-        console.log(error.response?.data);
-
-        alert(
-        JSON.stringify(
-            error.response?.data || "Registration failed"
-        )
-        );
+      alert("Registration successful!");
+      navigate("/login");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        JSON.stringify(err.response?.data) ||
+        "Registration failed. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
-    };
+  };
 
   return (
-    <div className="min-h-screen flex bg-white">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
 
-      {/* Left Section */}
-      <div className="hidden lg:flex w-1/2 bg-blue-700 text-white flex-col justify-center px-16">
-
-        <h1 className="text-5xl font-bold mb-6">
-          Start Your Journey
+        <h1 className="text-3xl font-bold text-center text-blue-600 mb-2">
+          Create Account
         </h1>
 
-        <p className="text-lg text-blue-100 leading-8">
-          Create your account and explore thousands
-          of job opportunities. Connect with companies
-          and take the next step in your career.
+        <p className="text-center text-gray-500 mb-6">
+          Join our AI Powered Job Portal
         </p>
 
-        <div className="mt-12">
-          <h2 className="text-3xl font-bold">
-            Your Career Starts Here!
-          </h2>
-        </div>
+        {error && (
+          <p className="bg-red-100 text-red-600 p-3 rounded mb-4 text-sm">
+            {error}
+          </p>
+        )}
 
-      </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
 
-      {/* Right Section */}
-      <div className="flex w-full lg:w-1/2 items-center justify-center px-6 py-10 bg-gray-50">
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+            className="w-full border p-3 rounded-lg"
+          />
 
-        <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl">
+          <input
+            type="email"
+            name="email"
+            placeholder="Email Address"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="w-full border p-3 rounded-lg"
+          />
 
-          <div className="text-center mb-7">
-            <h1 className="text-3xl font-bold text-blue-700">
-              JobPortal
-            </h1>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="w-full border p-3 rounded-lg"
+          />
 
-            <h2 className="text-2xl font-semibold mt-5 text-gray-800">
-              Create Account
-            </h2>
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+            className="w-full border p-3 rounded-lg"
+          />
 
-            <p className="text-gray-500 mt-2">
-              Join us and find your dream job.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-
-            <label className="block font-medium text-gray-700 mb-2">
-              Username
-            </label>
-
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="Enter username"
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            <label className="block font-medium text-gray-700 mb-2">
-              Email
-            </label>
-
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter email"
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            <label className="block font-medium text-gray-700 mb-2">
-              Password
-            </label>
-
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Create password"
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            <label className="block font-medium text-gray-700 mb-2">
-              Confirm Password
-            </label>
-
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm password"
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            <label className="block font-medium text-gray-700 mb-2">
-              Register As
+          <div>
+            <label className="block mb-2 font-medium text-gray-700">
+              Select Account Type
             </label>
 
             <select
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-6 outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border p-3 rounded-lg"
             >
               <option value="seeker">Job Seeker</option>
               <option value="recruiter">Recruiter</option>
             </select>
+          </div>
 
-            <button
-              type="submit"
-              className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition duration-300"
-            >
-              Create Account
-            </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            {loading ? "Creating Account..." : "Register"}
+          </button>
 
-          </form>
+        </form>
 
-          <p className="text-center text-gray-600 mt-6">
-            Already have an account?
-            <Link
-              to="/login"
-              className="text-blue-700 font-semibold ml-1"
-            >
-              Login
-            </Link>
-          </p>
+        <p className="text-center text-gray-600 mt-6">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-600 font-semibold">
+            Login
+          </Link>
+        </p>
 
-        </div>
       </div>
     </div>
   );
