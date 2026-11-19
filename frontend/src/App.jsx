@@ -8,6 +8,7 @@ import RecruiterDashboard from "./pages/RecruiterDashboard";
 import Jobs from "./pages/Jobs";
 import CreateJob from "./pages/CreateJob";
 import ManageJobs from "./pages/ManageJobs";
+import JobDetails from "./pages/JobDetails";
 
 function ProtectedRoute({ children, allowedRole }) {
   const token = localStorage.getItem("token");
@@ -75,6 +76,14 @@ export default function App() {
           }
         />
       </Routes>
+      <Route
+          path="/jobs/:id"
+          element={
+            <ProtectedRoute>
+              <JobDetails />
+            </ProtectedRoute>
+  }
+/>
     </BrowserRouter>
   );
 }
